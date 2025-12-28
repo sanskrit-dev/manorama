@@ -27,6 +27,25 @@
         .hand.dragging {
             transition: none;
         }
+        /* Quiz Button Styles */
+        .quiz-btn {
+            transition: all 0.2s;
+        }
+        .quiz-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .quiz-btn.correct {
+            background-color: #dcfce7 !important; /* green-100 */
+            border-color: #16a34a !important; /* green-600 */
+            color: #14532d !important; /* green-900 */
+        }
+        .quiz-btn.wrong {
+            background-color: #fee2e2 !important; /* red-100 */
+            border-color: #dc2626 !important; /* red-600 */
+            color: #7f1d1d !important; /* red-900 */
+        }
+        
         /* Custom scrollbar for aesthetics */
         ::-webkit-scrollbar {
             width: 8px;
@@ -40,16 +59,16 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 text-slate-800">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 text-slate-800 pb-20">
 
     <!-- Header -->
-    <header class="mb-8 text-center">
+    <header class="mb-8 text-center mt-8">
         <h1 class="text-3xl md:text-5xl font-bold text-amber-700 mb-2">Sanskrit Timekeeper</h1>
-        <p class="text-sm md:text-base text-stone-500">Drag the clock hands to learn the time in Sanskrit</p>
+        <p class="text-sm md:text-base text-stone-500">Interactive Clock & Quiz</p>
     </header>
 
     <!-- Main Interface -->
-    <div class="flex flex-col md:flex-row items-center gap-12 max-w-6xl w-full justify-center">
+    <div class="flex flex-col md:flex-row items-center gap-12 max-w-6xl w-full justify-center mb-12">
         
         <!-- Interactive Clock Section -->
         <div class="relative w-80 h-80 md:w-96 md:h-96 flex-shrink-0">
@@ -82,10 +101,18 @@
         <!-- Display Section -->
         <div class="flex flex-col items-center md:items-start text-center md:text-left space-y-6 max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-stone-100">
             
-            <!-- Digital Time -->
+            <!-- Digital Time & Input -->
             <div class="w-full border-b border-stone-200 pb-4">
-                <span class="text-xs font-bold tracking-widest text-stone-400 uppercase">Current Setting</span>
-                <div class="text-5xl font-bold text-stone-800 mt-1" id="digital-time">12:00</div>
+                <span class="text-xs font-bold tracking-widest text-stone-400 uppercase">Current Time</span>
+                <div class="text-5xl font-bold text-stone-800 mt-1 mb-4" id="digital-time">12:00</div>
+                
+                <!-- Manual Input -->
+                <div class="flex items-center justify-center md:justify-start gap-2 bg-stone-50 p-2 rounded-lg border border-stone-200">
+                    <input type="number" id="input-hour" min="1" max="12" class="w-12 p-1 text-center font-bold text-stone-700 border border-stone-300 rounded focus:border-amber-500 focus:outline-none" placeholder="HH">
+                    <span class="text-stone-400 font-bold">:</span>
+                    <input type="number" id="input-minute" min="0" max="59" class="w-12 p-1 text-center font-bold text-stone-700 border border-stone-300 rounded focus:border-amber-500 focus:outline-none" placeholder="MM">
+                    <button onclick="setManualTime()" class="bg-amber-600 text-white px-3 py-1 rounded hover:bg-amber-700 transition-colors font-bold text-sm">Set</button>
+                </div>
             </div>
 
             <!-- Sanskrit Output -->
@@ -101,7 +128,7 @@
                 </div>
 
                 <!-- Grammar Note -->
-                <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-amber-900 mt-4">
+                <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-amber-900 mt-4" style="height: 80px !important">
                     <span class="font-bold mr-1" id="grammar-type">Full Hour:</span>
                     <span id="grammar-expl">Exact hour representation.</span>
                 </div>
@@ -110,8 +137,49 @@
         </div>
     </div>
 
-    <!-- Reference Table (Hidden toggle optional, but keeping it visible/subtle for learning) -->
-    <div class="mt-12 w-full max-w-4xl px-4">
+    <!-- Quiz Section -->
+    <div class="w-full max-w-2xl bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-100 relative overflow-hidden mb-12">
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
+        
+        <div class="flex justify-between items-center mb-6 relative z-10">
+            <h2 class="text-2xl font-bold text-amber-800">Time Quiz</h2>
+            <div id="quiz-status" class="hidden text-sm font-bold text-stone-400">Question <span id="q-num">1</span></div>
+        </div>
+        
+        <!-- Quiz Start Screen -->
+        <div id="quiz-start-view" class="text-center py-8">
+            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <p class="text-stone-600 mb-6 max-w-md mx-auto">Test your mastery of Sanskrit time telling! Questions cover Full hours, Quarter past (Sapāda), Half past (Sārdha), and Quarter to (Pādona).</p>
+            <button onclick="startQuiz()" class="bg-amber-600 text-white text-lg px-8 py-3 rounded-full shadow-lg hover:bg-amber-700 hover:scale-105 transition-all font-bold">Quiz Me</button>
+        </div>
+     
+        <!-- Quiz Question Screen -->
+        <div id="quiz-question-view" class="hidden">
+            <div class="text-center mb-8">
+                <p class="text-stone-500 mb-2 uppercase tracking-wide text-xs font-bold">What is this time in Sanskrit?</p>
+                <div id="quiz-time-display" class="text-5xl font-bold text-stone-800 font-mono tracking-tighter">--:--</div>
+            </div>
+     
+            <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Buttons injected via JS -->
+            </div>
+     
+            <div id="quiz-feedback" class="hidden mb-6 p-4 rounded-lg text-center font-bold border"></div>
+     
+            <div class="flex justify-end">
+                <button id="btn-next-q" onclick="nextQuestion()" class="hidden bg-stone-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-stone-900 flex items-center gap-2 transition-all">
+                    Next Question 
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </button>
+            </div>
+        </div>
+     </div>
+
+    <!-- Reference Table -->
+    <div class="w-full max-w-4xl px-4">
         <details class="group">
             <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-stone-500 hover:text-amber-700 transition-colors border-b border-stone-300 pb-2">
                 <span>View Quick Reference Guide</span>
@@ -160,7 +228,7 @@
             1: { dev: 'एक', rom: 'eka' },
             2: { dev: 'द्वि', rom: 'dvi' },
             3: { dev: 'त्रि', rom: 'tri' },
-            4: { dev: 'चतुर्', rom: 'catur' }, // Sandhi rule: Catur usually fits directly
+            4: { dev: 'चतुर्', rom: 'catur' },
             5: { dev: 'पञ्च', rom: 'pañca' },
             6: { dev: 'षड्', rom: 'ṣaḍ' },
             7: { dev: 'सप्त', rom: 'sapta' },
@@ -190,6 +258,9 @@
         const displayRom = document.getElementById('sanskrit-rom');
         const grammarType = document.getElementById('grammar-type');
         const grammarExpl = document.getElementById('grammar-expl');
+        
+        const inputHour = document.getElementById('input-hour');
+        const inputMinute = document.getElementById('input-minute');
 
         // State
         let currentHour = 12;
@@ -230,20 +301,11 @@
             updateText();
         }
 
-        // Clock Logic
-        function updateClockHands() {
-            const minuteDeg = currentMinute * 6;
-            const hourDeg = (currentHour % 12) * 30 + (currentMinute / 2);
-
-            minuteHandContainer.style.transform = `rotate(${minuteDeg}deg)`;
-            hourHand.style.transform = `rotate(${hourDeg}deg)`;
-        }
-
-        function updateText() {
-            // Snap logic for Sanskrit: Only 0, 15, 30, 45
-            // We find the closest quarter interval
-            let snapMin = Math.round(currentMinute / 15) * 15;
-            let displayH = currentHour;
+        // Logic to generate Sanskrit Text Object
+        function calculateSanskrit(hour, minute) {
+             // Snap logic for Sanskrit: Only 0, 15, 30, 45
+            let snapMin = Math.round(minute / 15) * 15;
+            let displayH = hour;
             
             // Handle wrapping
             if (snapMin === 60) {
@@ -251,13 +313,8 @@
                 displayH += 1;
             }
             if (displayH > 12) displayH -= 12;
-            if (displayH === 0) displayH = 12; // Should handle 12->1 transition
+            if (displayH === 0) displayH = 12;
 
-            // Formatting Digital Time
-            const mStr = currentMinute.toString().padStart(2, '0');
-            displayTime.innerText = `${currentHour}:${mStr}`;
-
-            // Sanskrit Construction
             let modifierKey = snapMin;
             let sanskritHourNum = displayH;
 
@@ -270,20 +327,65 @@
             const numObj = sanskritNumbers[sanskritHourNum];
             const modObj = modifiers[modifierKey];
 
-            // Construct Strings
-            let devString = modObj.dev + numObj.dev + 'वादनम्';
-            let romString = modObj.rom + numObj.rom + 'vādanam';
+            return {
+                dev: modObj.dev + numObj.dev + 'वादनम्',
+                rom: modObj.rom + numObj.rom + 'vādanam',
+                type: modObj.type,
+                expl: modObj.expl,
+                snapMin: snapMin
+            };
+        }
+
+        // Clock Logic
+        function updateClockHands() {
+            const minuteDeg = currentMinute * 6;
+            const hourDeg = (currentHour % 12) * 30 + (currentMinute / 2);
+
+            minuteHandContainer.style.transform = `rotate(${minuteDeg}deg)`;
+            hourHand.style.transform = `rotate(${hourDeg}deg)`;
+            
+            // Sync inputs
+            inputHour.value = currentHour;
+            inputMinute.value = currentMinute.toString().padStart(2, '0');
+        }
+
+        function updateText() {
+            const result = calculateSanskrit(currentHour, currentMinute);
+
+            // Formatting Digital Time
+            const mStr = currentMinute.toString().padStart(2, '0');
+            displayTime.innerText = `${currentHour}:${mStr}`;
 
             // UI Update
-            displayDev.innerText = devString;
-            displayRom.innerText = romString;
-            grammarType.innerText = modObj.type + ":";
-            grammarExpl.innerText = modObj.expl;
+            displayDev.innerText = result.dev;
+            displayRom.innerText = result.rom;
+            grammarType.innerText = result.type + ":";
+            grammarExpl.innerText = result.expl;
 
             // Visual feedback if not exact quarter
-            if (currentMinute !== snapMin && snapMin !== 60) {
+            if (currentMinute !== result.snapMin && result.snapMin !== 60) {
                 grammarExpl.innerText += ` (Approximated from ${currentMinute} min)`;
             }
+        }
+        
+        // Manual Input Logic
+        function setManualTime() {
+            let h = parseInt(inputHour.value);
+            let m = parseInt(inputMinute.value);
+            
+            if (isNaN(h)) h = 12;
+            if (isNaN(m)) m = 0;
+            
+            // Clamp values
+            if (h < 1) h = 1;
+            if (h > 12) h = 12;
+            if (m < 0) m = 0;
+            if (m > 59) m = 59;
+            
+            currentHour = h;
+            currentMinute = m;
+            updateClockHands();
+            updateText();
         }
 
         // Interaction Logic
@@ -312,32 +414,25 @@
             let rawMinutes = Math.round(angle / 6);
             if (rawMinutes === 60) rawMinutes = 0;
 
-            // Determine if we crossed the hour boundary
-            // Simple heuristic: if jumping from 55-59 to 0-5, increment hour.
-            // If jumping from 0-5 to 55-59, decrement hour.
             const diff = rawMinutes - currentMinute;
             
             if (diff < -30) {
-                // Wrapped forward
                 currentHour++;
                 if (currentHour > 12) currentHour = 1;
             } else if (diff > 30) {
-                // Wrapped backward
                 currentHour--;
                 if (currentHour < 1) currentHour = 12;
             }
 
             currentMinute = rawMinutes;
-            
             updateClockHands();
             updateText();
         }
 
-        // Event Listeners
         const startDrag = (e) => {
             isDragging = true;
             minuteHandContainer.classList.add('dragging');
-            handleDrag(e); // Snap immediately to tap location
+            handleDrag(e); 
         };
 
         const endDrag = () => {
@@ -345,15 +440,120 @@
             minuteHandContainer.classList.remove('dragging');
         };
 
-        // Mouse
+        // Event Listeners
         clockFace.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', handleDrag);
         window.addEventListener('mouseup', endDrag);
 
-        // Touch
         clockFace.addEventListener('touchstart', startDrag, { passive: false });
         window.addEventListener('touchmove', handleDrag, { passive: false });
         window.addEventListener('touchend', endDrag);
+
+        // --- QUIZ LOGIC ---
+        
+        let quizActive = false;
+        let quizQCount = 0;
+
+        function startQuiz() {
+            document.getElementById('quiz-start-view').classList.add('hidden');
+            document.getElementById('quiz-question-view').classList.remove('hidden');
+            document.getElementById('quiz-status').classList.remove('hidden');
+            quizQCount = 0;
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            quizQCount++;
+            document.getElementById('q-num').innerText = quizQCount;
+            
+            // Reset UI
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('btn-next-q').classList.add('hidden');
+            document.getElementById('quiz-options').innerHTML = '';
+            
+            // Generate Random Time (Only 0, 15, 30, 45)
+            const qH = Math.floor(Math.random() * 12) + 1;
+            const mins = [0, 15, 30, 45];
+            const qM = mins[Math.floor(Math.random() * mins.length)];
+            
+            const correctData = calculateSanskrit(qH, qM);
+            const mStr = qM.toString().padStart(2, '0');
+            document.getElementById('quiz-time-display').innerText = `${qH}:${mStr}`;
+            
+            // Generate Options
+            let options = [];
+            // 1. Correct Answer
+            options.push({ text: correctData.rom, correct: true, dev: correctData.dev });
+            
+            // 2. Distractor: Wrong Modifier (same hour)
+            let wrongM = mins.filter(m => m !== qM)[Math.floor(Math.random() * 3)];
+            let dist1 = calculateSanskrit(qH, wrongM);
+            options.push({ text: dist1.rom, correct: false });
+            
+            // 3. Distractor: Wrong Hour (same modifier)
+            let wrongH = qH === 12 ? 1 : qH + 1;
+            let dist2 = calculateSanskrit(wrongH, qM);
+            options.push({ text: dist2.rom, correct: false });
+            
+            // 4. Distractor: The "Padona" Trap OR just random
+            // If it's 4:45 (Padona Panca), distractor should be Padona Catur (3:45)
+            // If it's 4:15 (Sapada Catur), distractor Sapada Panca
+            let dist3;
+            if (qM === 45) {
+                // Generate the "wrong" padona (using current hour instead of next)
+                let trapNum = sanskritNumbers[qH]; 
+                let trapStr = modifiers[45].rom + trapNum.rom + 'vādanam';
+                dist3 = { text: trapStr, correct: false };
+            } else {
+                 let wrongH2 = qH === 1 ? 12 : qH - 1;
+                 let d3 = calculateSanskrit(wrongH2, qM);
+                 dist3 = { text: d3.rom, correct: false };
+            }
+            options.push(dist3);
+            
+            // Shuffle Options
+            options.sort(() => Math.random() - 0.5);
+            
+            // Render Buttons
+            const optContainer = document.getElementById('quiz-options');
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-btn w-full p-4 border border-stone-200 rounded-lg text-left font-medium text-stone-700 bg-white hover:bg-stone-50 hover:border-amber-400";
+                btn.innerText = opt.text;
+                btn.onclick = () => checkAnswer(btn, opt);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, option) {
+            // Disable all buttons
+            const buttons = document.querySelectorAll('.quiz-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (option.correct) {
+                btn.classList.add('correct');
+                feedbackEl.className = "mb-6 p-4 rounded-lg text-center font-bold border bg-green-50 border-green-200 text-green-800";
+                feedbackEl.innerHTML = `Correct! <br><span class="text-xl font-normal devanagari mt-2 block">${option.dev}</span>`;
+            } else {
+                btn.classList.add('wrong');
+                feedbackEl.className = "mb-6 p-4 rounded-lg text-center font-bold border bg-red-50 border-red-200 text-red-800";
+                
+                // Find and highlight correct one
+                buttons.forEach(b => {
+                    // This is a bit hacky, checking innerText against data, but works for this scope
+                    // Better to store ref, but option.correct is reliable
+                    // Since we passed logic, let's just find the one that was correct in data
+                });
+                
+                // Simple feedback text
+                feedbackEl.innerText = "Incorrect. Try the next one!";
+            }
+
+            document.getElementById('btn-next-q').classList.remove('hidden');
+        }
 
         // Initialize
         initClock();

@@ -15,7 +15,7 @@
             user-select: none; /* Prevent text selection while dragging */
         }
         .devanagari {
-            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-family: 'Shobhika', sans-serif;
         }
         .clock-shadow {
             box-shadow: 20px 20px 60px #d1d5db, -20px -20px 60px #ffffff;
@@ -119,7 +119,7 @@
             <div class="w-full space-y-4">
                 <div>
                     <span class="text-xs font-bold tracking-widest text-amber-600 uppercase">Devanagari</span>
-                    <div class="text-4xl md:text-5xl font-bold text-amber-800 mt-1 devanagari min-h-[3.5rem]" id="sanskrit-dev">द्वादशवादनम्</div>
+                    <div class="text-4xl md:text-5xl font-bold text-amber-800 mt-4 devanagari h-[5rem]" id="sanskrit-dev">द्वादशवादनम्</div>
                 </div>
                 
                 <div>
@@ -128,7 +128,7 @@
                 </div>
 
                 <!-- Grammar Note -->
-                <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-amber-900 mt-4" style="height: 80px !important">
+                <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-amber-900 mt-4 h-[4rem]">
                     <span class="font-bold mr-1" id="grammar-type">Full Hour:</span>
                     <span id="grammar-expl">Exact hour representation.</span>
                 </div>
@@ -555,7 +555,25 @@
             document.getElementById('btn-next-q').classList.remove('hidden');
         }
 
-        // Initialize
+        function getCurrentTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes();
+            // const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12; // The hour '0' should be '12'
+            const formattedTime = hours + ':' + (minutes < 10 ? '0' + minutes : minutes);
+
+            return formattedTime;
+        }
+
+        function setCurrentTime() {
+            [inputHour.value, inputMinute.value] = getCurrentTime().split(":")
+            setManualTime();
+        }
+
+        setCurrentTime();
         initClock();
 
     </script>

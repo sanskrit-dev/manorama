@@ -84,6 +84,8 @@
                 <!-- Center Point -->
                 <div class="w-4 h-4 bg-amber-700 rounded-full z-20 absolute shadow-md"></div>
 
+                <div id="second-hand" class="hand absolute w-1 bg-stone-500 z-10 rounded-full" style="height: 25%; bottom: 50%; left: calc(50% - 4px);"></div>
+
                 <!-- Hour Hand -->
                 <div id="hour-hand" class="hand absolute w-2 bg-stone-800 z-10 rounded-full" style="height: 25%; bottom: 50%; left: calc(50% - 4px);"></div>
 
@@ -519,6 +521,9 @@
             options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = "quiz-btn w-full p-4 border border-stone-200 rounded-lg text-left font-medium text-stone-700 bg-white hover:bg-stone-50 hover:border-amber-400";
+                if (opt.correct) {
+                    btn.className += " is-correct"
+                }
                 btn.innerText = opt.text;
                 btn.onclick = () => checkAnswer(btn, opt);
                 optContainer.appendChild(btn);
@@ -540,16 +545,15 @@
             } else {
                 btn.classList.add('wrong');
                 feedbackEl.className = "mb-6 p-4 rounded-lg text-center font-bold border bg-red-50 border-red-200 text-red-800";
-                
+
+                feedbackEl.innerText = "Incorrect. Try the next one!";
+
                 // Find and highlight correct one
                 buttons.forEach(b => {
-                    // This is a bit hacky, checking innerText against data, but works for this scope
-                    // Better to store ref, but option.correct is reliable
-                    // Since we passed logic, let's just find the one that was correct in data
+                    if (b.classList.contains("is-correct")) {
+                        b.classList.add('correct');
+                    }
                 });
-                
-                // Simple feedback text
-                feedbackEl.innerText = "Incorrect. Try the next one!";
             }
 
             document.getElementById('btn-next-q').classList.remove('hidden');

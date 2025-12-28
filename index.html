@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanskrit Fun Zone - Interactive Learning</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fff9e6 0%, #e8f5e9 100%);
+            --header-color: #d35400;
+            --accent-soft: #f39c12;
+            --card-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 10px;
+        }
+
+        .header-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: var(--header-color);
+            font-size: 2.8rem;
+            margin: 0;
+            text-shadow: 2px 2px 0px #fff;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 10px auto;
+        }
+
+        /* The Grid */
+        #toolsGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        /* Playful Card Design */
+        .card {
+            background: white;
+            border-radius: 25px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--card-shadow);
+            border: 4px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: scale(1.05) rotate(1deg);
+            border-color: var(--accent-soft);
+        }
+
+        .emoji-thumb {
+            font-size: 4rem;
+            background: #fff3e0;
+            width: 100px;
+            height: 100px;
+            line-height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            color: var(--header-color);
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .play-btn {
+            background: var(--accent-soft);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            display: block;
+            transition: background 0.2s;
+        }
+
+        .play-btn:hover {
+            background: var(--header-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-icon">🕉️ ✨ 🎨</div>
+        <h1>Sanskrit Playroom</h1>
+        <p class="subtitle">Making the world's oldest language your newest favorite game!</p>
+    </header>
+
+    <div id="toolsGrid"></div>
+
+    <footer>
+        Hand-crafted for learners of all ages • 2025
+    </footer>
+
+    <script>
+        const tools = [
+            {
+                name: "Little Guru",
+                desc: "The world's first gamified Sanskrit app! Learn with AI-tutors, fun animations, and level up like a pro.",
+                emoji: "🦁",
+                tag: "GAMIFIED APP",
+                url: "https://little-guru.com/"
+            },
+            {
+                name: "Sanskrit Rhymes",
+                desc: "Sing along to beautiful nursery rhymes (Samskrita Gitani) that make vocabulary stick through music.",
+                emoji: "🎶",
+                tag: "KIDS & MUSIC",
+                url: "https://www.sanskritfromhome.org/"
+            },
+            {
+                name: "Wordwall Games",
+                desc: "Pop balloons, chase mazes, and spin wheels to learn Devanagari letters and basic words.",
+                emoji: "🎈",
+                tag: "MINI GAMES",
+                url: "https://wordwall.net/en-us/community/sanskrit-games"
+            },
+            {
+                name: "Amarahasa Stories",
+                desc: "A library of beginner-friendly stories with word-for-word translations. Perfect for bedtime reading!",
+                emoji: "📖",
+                tag: "STORY TIME",
+                url: "https://www.learnsanskrit.org/resources/"
+            },
+            {
+                name: "Sanskrit Made Easy",
+                desc: "Bite-sized video lessons and interactive quizzes designed for absolute beginners.",
+                emoji: "🌟",
+                tag: "EASY VIDEO",
+                url: "https://play.google.com/store/apps/details?id=co.alicia.emace"
+            }
+        ];
+
+        const grid = document.getElementById('toolsGrid');
+
+        tools.forEach(tool => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div>
+                    <div class="emoji-thumb">${tool.emoji}</div>
+                    <span class="badge">${tool.tag}</span>
+                    <h3>${tool.name}</h3>
+                    <p>${tool.desc}</p>
+                </div>
+                <a href="${tool.url}" class="play-btn" target="_blank">Start Playing →</a>
+            `;
+            grid.appendChild(card);
+        });
+    </script>
+</body>
+</html>

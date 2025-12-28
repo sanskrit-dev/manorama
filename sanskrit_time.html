@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanskrit Timekeeper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Playfair Display', serif;
+            background-color: #fdfbf7;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+            user-select: none; /* Prevent text selection while dragging */
+        }
+        .devanagari {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        }
+        .clock-shadow {
+            box-shadow: 20px 20px 60px #d1d5db, -20px -20px 60px #ffffff;
+        }
+        .hand {
+            transform-origin: bottom center;
+            transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+        }
+        .hand.dragging {
+            transition: none;
+        }
+        /* Custom scrollbar for aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d97706; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 text-slate-800">
+
+    <!-- Header -->
+    <header class="mb-8 text-center">
+        <h1 class="text-3xl md:text-5xl font-bold text-amber-700 mb-2">Sanskrit Timekeeper</h1>
+        <p class="text-sm md:text-base text-stone-500">Drag the clock hands to learn the time in Sanskrit</p>
+    </header>
+
+    <!-- Main Interface -->
+    <div class="flex flex-col md:flex-row items-center gap-12 max-w-6xl w-full justify-center">
+        
+        <!-- Interactive Clock Section -->
+        <div class="relative w-80 h-80 md:w-96 md:h-96 flex-shrink-0">
+            <!-- Clock Container -->
+            <div class="w-full h-full rounded-full bg-white clock-shadow relative border-8 border-stone-100 flex items-center justify-center" id="clock-face">
+                
+                <!-- Clock Markings -->
+                <div class="absolute w-full h-full" id="markings"></div>
+
+                <!-- Numbers -->
+                <div class="absolute inset-0" id="numbers"></div>
+
+                <!-- Center Point -->
+                <div class="w-4 h-4 bg-amber-700 rounded-full z-20 absolute shadow-md"></div>
+
+                <!-- Hour Hand -->
+                <div id="hour-hand" class="hand absolute w-2 bg-stone-800 z-10 rounded-full" style="height: 25%; bottom: 50%; left: calc(50% - 4px);"></div>
+
+                <!-- Minute Hand (Interactive) -->
+                <div id="minute-hand-container" class="hand absolute w-10 z-10 flex justify-center cursor-grab active:cursor-grabbing" style="height: 40%; bottom: 50%; left: calc(50% - 20px);">
+                    <div class="w-1.5 h-full bg-amber-600 rounded-full relative">
+                        <!-- Draggable Knob -->
+                        <div class="w-6 h-6 bg-amber-700 rounded-full absolute -top-2 -left-[9px] border-2 border-white shadow-sm"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Display Section -->
+        <div class="flex flex-col items-center md:items-start text-center md:text-left space-y-6 max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-stone-100">
+            
+            <!-- Digital Time -->
+            <div class="w-full border-b border-stone-200 pb-4">
+                <span class="text-xs font-bold tracking-widest text-stone-400 uppercase">Current Setting</span>
+                <div class="text-5xl font-bold text-stone-800 mt-1" id="digital-time">12:00</div>
+            </div>
+
+            <!-- Sanskrit Output -->
+            <div class="w-full space-y-4">
+                <div>
+                    <span class="text-xs font-bold tracking-widest text-amber-600 uppercase">Devanagari</span>
+                    <div class="text-4xl md:text-5xl font-bold text-amber-800 mt-1 devanagari min-h-[3.5rem]" id="sanskrit-dev">द्वादशवादनम्</div>
+                </div>
+                
+                <div>
+                    <span class="text-xs font-bold tracking-widest text-amber-600 uppercase">Transliteration</span>
+                    <div class="text-xl md:text-2xl italic text-stone-600 mt-1 font-serif min-h-[2rem]" id="sanskrit-rom">dvādaśavādanam</div>
+                </div>
+
+                <!-- Grammar Note -->
+                <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-amber-900 mt-4">
+                    <span class="font-bold mr-1" id="grammar-type">Full Hour:</span>
+                    <span id="grammar-expl">Exact hour representation.</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Reference Table (Hidden toggle optional, but keeping it visible/subtle for learning) -->
+    <div class="mt-12 w-full max-w-4xl px-4">
+        <details class="group">
+            <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-stone-500 hover:text-amber-700 transition-colors border-b border-stone-300 pb-2">
+                <span>View Quick Reference Guide</span>
+                <span class="transition group-open:rotate-180">
+                    <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                </span>
+            </summary>
+            <div class="text-stone-600 mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm bg-white p-6 rounded-xl shadow-inner">
+                <div>
+                    <h3 class="font-bold text-amber-700 mb-2">Base Numbers</h3>
+                    <ul class="space-y-1">
+                        <li>1: Eka (एक)</li>
+                        <li>2: Dvi (द्वि)</li>
+                        <li>3: Tri (त्रि)</li>
+                        <li>4: Catur (चतुर्)</li>
+                        <li>5: Pañca (पञ्च)</li>
+                        <li>6: Ṣaḍ (षड्)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-amber-700 mb-2 md:invisible">Base Numbers Cont.</h3>
+                    <ul class="space-y-1">
+                        <li>7: Sapta (सप्त)</li>
+                        <li>8: Aṣṭa (अष्ट)</li>
+                        <li>9: Nava (नव)</li>
+                        <li>10: Daśa (दश)</li>
+                        <li>11: Ekādaśa (एकादश)</li>
+                        <li>12: Dvādaśa (द्वादश)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-amber-700 mb-2">Modifiers</h3>
+                    <ul class="space-y-1">
+                        <li><span class="font-bold">:15</span> Sapāda (सपाद)</li>
+                        <li><span class="font-bold">:30</span> Sārdha (सार्ध)</li>
+                        <li><span class="font-bold">:45</span> Pādona (पादोन) [-15 from next hour]</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <script>
+        // Data Structures
+        const sanskritNumbers = {
+            1: { dev: 'एक', rom: 'eka' },
+            2: { dev: 'द्वि', rom: 'dvi' },
+            3: { dev: 'त्रि', rom: 'tri' },
+            4: { dev: 'चतुर्', rom: 'catur' }, // Sandhi rule: Catur usually fits directly
+            5: { dev: 'पञ्च', rom: 'pañca' },
+            6: { dev: 'षड्', rom: 'ṣaḍ' },
+            7: { dev: 'सप्त', rom: 'sapta' },
+            8: { dev: 'अष्ट', rom: 'aṣṭa' },
+            9: { dev: 'नव', rom: 'nava' },
+            10: { dev: 'दश', rom: 'daśa' },
+            11: { dev: 'एकादश', rom: 'ekādaśa' },
+            12: { dev: 'द्वादश', rom: 'dvādaśa' }
+        };
+
+        const modifiers = {
+            0: { dev: '', rom: '', type: 'Full Hour', expl: 'Direct translation of the hour.' },
+            15: { dev: 'सपाद ', rom: 'sapāda ', type: 'Quarter Past (+15)', expl: 'Sapāda means with a quarter.' },
+            30: { dev: 'सार्ध ', rom: 'sārdha ', type: 'Half Past (+30)', expl: 'Sārdha means with a half.' },
+            45: { dev: 'पादोन ', rom: 'pādona ', type: 'Quarter To (-15)', expl: 'Pādona means a quarter less than the next hour.' }
+        };
+
+        // DOM Elements
+        const hourHand = document.getElementById('hour-hand');
+        const minuteHandContainer = document.getElementById('minute-hand-container');
+        const clockFace = document.getElementById('clock-face');
+        const markingsContainer = document.getElementById('markings');
+        const numbersContainer = document.getElementById('numbers');
+        
+        const displayTime = document.getElementById('digital-time');
+        const displayDev = document.getElementById('sanskrit-dev');
+        const displayRom = document.getElementById('sanskrit-rom');
+        const grammarType = document.getElementById('grammar-type');
+        const grammarExpl = document.getElementById('grammar-expl');
+
+        // State
+        let currentHour = 12;
+        let currentMinute = 0;
+        let isDragging = false;
+
+        // Initialization
+        function initClock() {
+            // Generate markings
+            for (let i = 0; i < 60; i++) {
+                const el = document.createElement('div');
+                const isHour = i % 5 === 0;
+                el.className = `absolute bg-stone-300 origin-bottom ${isHour ? 'w-1 h-3 bg-stone-800' : 'w-0.5 h-2'}`;
+                el.style.left = 'calc(50% - ' + (isHour ? '2px' : '1px') + ')';
+                el.style.bottom = '50%';
+                el.style.transform = `rotate(${i * 6}deg) translate(0, -145px)`; // 160 radius - padding
+                if(isHour) el.style.transform = `rotate(${i * 6}deg) translate(0, -140px)`;
+                markingsContainer.appendChild(el);
+            }
+
+            // Generate Numbers
+            for (let i = 1; i <= 12; i++) {
+                const el = document.createElement('div');
+                el.className = 'absolute text-xl font-bold text-stone-600 w-8 h-8 flex items-center justify-center';
+                const angle = i * 30;
+                // Trig to position numbers
+                const radius = 120; // smaller than face
+                const x = 50 + (radius/160 * 50) * Math.sin(angle * Math.PI / 180);
+                const y = 50 - (radius/160 * 50) * Math.cos(angle * Math.PI / 180);
+                
+                el.style.left = `calc(${x}% - 1rem)`;
+                el.style.top = `calc(${y}% - 1rem)`;
+                el.innerText = i;
+                numbersContainer.appendChild(el);
+            }
+
+            updateClockHands();
+            updateText();
+        }
+
+        // Clock Logic
+        function updateClockHands() {
+            const minuteDeg = currentMinute * 6;
+            const hourDeg = (currentHour % 12) * 30 + (currentMinute / 2);
+
+            minuteHandContainer.style.transform = `rotate(${minuteDeg}deg)`;
+            hourHand.style.transform = `rotate(${hourDeg}deg)`;
+        }
+
+        function updateText() {
+            // Snap logic for Sanskrit: Only 0, 15, 30, 45
+            // We find the closest quarter interval
+            let snapMin = Math.round(currentMinute / 15) * 15;
+            let displayH = currentHour;
+            
+            // Handle wrapping
+            if (snapMin === 60) {
+                snapMin = 0;
+                displayH += 1;
+            }
+            if (displayH > 12) displayH -= 12;
+            if (displayH === 0) displayH = 12; // Should handle 12->1 transition
+
+            // Formatting Digital Time
+            const mStr = currentMinute.toString().padStart(2, '0');
+            displayTime.innerText = `${currentHour}:${mStr}`;
+
+            // Sanskrit Construction
+            let modifierKey = snapMin;
+            let sanskritHourNum = displayH;
+
+            // SPECIAL RULE: Pādona (45) refers to the NEXT hour
+            if (snapMin === 45) {
+                sanskritHourNum += 1;
+                if (sanskritHourNum > 12) sanskritHourNum = 1;
+            }
+
+            const numObj = sanskritNumbers[sanskritHourNum];
+            const modObj = modifiers[modifierKey];
+
+            // Construct Strings
+            let devString = modObj.dev + numObj.dev + 'वादनम्';
+            let romString = modObj.rom + numObj.rom + 'vādanam';
+
+            // UI Update
+            displayDev.innerText = devString;
+            displayRom.innerText = romString;
+            grammarType.innerText = modObj.type + ":";
+            grammarExpl.innerText = modObj.expl;
+
+            // Visual feedback if not exact quarter
+            if (currentMinute !== snapMin && snapMin !== 60) {
+                grammarExpl.innerText += ` (Approximated from ${currentMinute} min)`;
+            }
+        }
+
+        // Interaction Logic
+        function getAngleFromEvent(e) {
+            const rect = clockFace.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            let angle = Math.atan2(clientY - centerY, clientX - centerX) * 180 / Math.PI;
+            // Convert to 0-360 starting from 12 o'clock (which is -90 in pure math)
+            angle += 90;
+            if (angle < 0) angle += 360;
+            return angle;
+        }
+
+        function handleDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault(); // Prevent scrolling on touch
+
+            const angle = getAngleFromEvent(e);
+            
+            // Convert angle to minutes (360 degrees = 60 minutes)
+            let rawMinutes = Math.round(angle / 6);
+            if (rawMinutes === 60) rawMinutes = 0;
+
+            // Determine if we crossed the hour boundary
+            // Simple heuristic: if jumping from 55-59 to 0-5, increment hour.
+            // If jumping from 0-5 to 55-59, decrement hour.
+            const diff = rawMinutes - currentMinute;
+            
+            if (diff < -30) {
+                // Wrapped forward
+                currentHour++;
+                if (currentHour > 12) currentHour = 1;
+            } else if (diff > 30) {
+                // Wrapped backward
+                currentHour--;
+                if (currentHour < 1) currentHour = 12;
+            }
+
+            currentMinute = rawMinutes;
+            
+            updateClockHands();
+            updateText();
+        }
+
+        // Event Listeners
+        const startDrag = (e) => {
+            isDragging = true;
+            minuteHandContainer.classList.add('dragging');
+            handleDrag(e); // Snap immediately to tap location
+        };
+
+        const endDrag = () => {
+            isDragging = false;
+            minuteHandContainer.classList.remove('dragging');
+        };
+
+        // Mouse
+        clockFace.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('mouseup', endDrag);
+
+        // Touch
+        clockFace.addEventListener('touchstart', startDrag, { passive: false });
+        window.addEventListener('touchmove', handleDrag, { passive: false });
+        window.addEventListener('touchend', endDrag);
+
+        // Initialize
+        initClock();
+
+    </script>
+</body>
+</html>
